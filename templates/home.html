@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block content %}
+    {% load static %}
+    {% load comictracker_extras %}
+    <div class="container" style="margin-top: 50px; margin-bottom: 15rem;">
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="card" style="margin: 20px">
+                        <div class="card-header d-flex justify-content-center">
+                            <h5 class="card-title">My Series</h5>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        <!-- Comics List  -->
+        {% if series_list %}
+                <!--        Accordion for Series        -->
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="accordion accordion-flush" id="accordionFlush">
+                        {% for series in series_list %}
+                          <div class="accordion-item">
+                            <h2 class="accordion-header" id="{{'head'|add_id:series.id}}">
+                              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                      data-bs-target="#{{'coll'|add_id:series.id}}" aria-expanded="false" aria-controls="{{'coll'|add_id:series.id}}">
+                                  <img src="{{series.image}}" style="width: 50px; height: auto;">
+                                  <h5 style="padding-left: 50px;"><b>{{series.name}} ({{series.year}})</b></h5>
+                              </button>
+                            </h2>
+                            <div id="{{'coll'|add_id:series.id}}" class="accordion-collapse collapse" aria-labelledby="{{'head'|add_id:series.id}}" data-bs-parent="#accordionFlush">
+                              <div class="accordion-body">
+                                  <ul class="list-group list-group-flush" style="list-style-type: none;">
+                                      {% for comic in series_list|comics_in_series:series %}
+                                        <li id="{{comic.id}}">
+                                            <div class="d-flex align-items-center" style="margin: 3px;">
+                                                <img src="{{comic.image}}" style="width: 50px; height: auto;">
+                                                <p style="text-align: center; padding-left: 25px; padding-right: 10px;">{{comic.name}}</p>
+                                                <button type="button" class="btn btn-dark edit-opener" data-bs-toggle="modal" data-bs-target="#editModal" style="background-color: #00a9b5; margin-left: auto;" data-id="{{comic.id}}">
+                                                    <img src="{% static 'archive.svg' %}" alt="Add to Arc" style="margin-left: auto;" >
+                                                </button>
+                                                <button type="button" class="btn remove-item" data-bs-toggle="modal" data-bs-target="#removeModal" data-id="{{comic.id}}">
+                                                    <img src="{% static 'x-lg.svg' %}" alt="Remove" style="margin-left: auto; padding-left: 10px;" >
+                                                </button>
+                                            </div>
+                                        </li>
+                                      {% endfor %}
+                                  </ul>
+                              </div>
+                            </div>
+                          </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+                <!--        End Accordion for Series        -->
+        {% else %}
+        <div class="row justify-content-center">
+            <div class="card" style="margin: 20px">
+                <div class="card-body d-flex justify-content-center">
+                    <p style="text-align: center;">It looks like you don't have any comics added yet.</p>
+                    <br>
+                        <img src="{% static 'pg_chibi.jpg' %}">
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+<!--    # EDIT MODAL    -->
+    <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="editModalLabel">Add to Arc</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            ...
+          </div>
+          <div class="modal-footer">
+              <input id="issue-action" value="">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary">Save changes</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+<!--    # REMOVE MODAL    -->
+
+    <div class="modal fade" id="removeModal" tabindex="-1" aria-labelledby="removeModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="removeModalLabel">Are you sure you want to remove this item?</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body d-flex justify-content-end">
+              <form method="Post" id="delete_form">
+                  {% csrf_token %}
+                  <input hidden id="delete" name="delete" value="">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                  <button type="submit" class="btn btn-primary">Confirm</button>
+              </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script type="text/javascript" src="{% static 'js/home.js' %}"></script>
+
+{% endblock %}

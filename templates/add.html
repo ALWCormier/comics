@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block content %}
+    {% load static %}
+    {% load comictracker_extras %}
+
+    <div class="container" style="margin-top: 50px; margin-bottom: 25px;">
+        <div class="row">
+            <div class="card text-white" style="margin-bottom: 50px; background-color: #00a9b5;">
+                <div class="card-body d-flex justify-content-around align-items-center">
+<!--                    <img src="{% static 'nightwing.png' %}" style="width: 50px; height: auto;">-->
+                    <h2 style="text-align: center;">Search Based on Series</h2>
+<!--                    <img src="{% static 'nightwing.png' %}" style="width: 50px; height: auto;">-->
+                </div>
+            </div>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-lg-6">
+                <form class="d-flex" method="POST">
+                  {% csrf_token %}
+                  <input class="form-control me-2" id="search" name="search" type="search" placeholder="Search Series" aria-label="Search" style="height: 70px;">
+                  <button class="btn btn-light" type="submit" style="background-color: #00a9b5;">
+                    <img src="{% static 'search-heart.svg' %}">
+                  </button>
+                </form>
+            </div>
+        </div>
+
+
+        <div class="row justify-content-center">
+            <div class="col-lg-7">
+                {% for item in results %}
+                    <!--  Misleading if, displays search results for series  -->
+                    {% if not series %}
+                        <form method="POST">
+                        {% csrf_token %}
+                        <div class="card" style="margin: 5px;">
+                            <button class="btn btn-light" type="submit">
+                                <div class="card-body d-flex justify-content-start align-items-center" style="border: 15px;">
+                                    <img src="{{item|cover}}" style="width: 75px; height: auto;">
+                                    <h5 style="text-align: center; padding-left: 25px;">{{item|obj_name}}</h5>
+                                    <h5 style="text-align: center; padding-left: 10px;">({{item|number}})</h5>
+                                    <input type="hidden" name="series_id" value="{{item|obj_id}}"></input>
+                                </div>
+                            </button>
+                        </div>
+                        </form>
+
+                        <!--  Otherwise, displays issues  -->
+                    {% else %}
+
+                        <form class="issue-select" method="POST" id="{{item|obj_id}}">
+                        {% csrf_token %}
+                            <div class="card" style="margin: 5px;">
+                                <div class="card-body" style="border: 15px;">
+                                    <div class="d-flex align-items-center">
+                                        <img src="{{item|cover}}" style="width: 50px; height: auto;">
+                                        <p style="text-align: center; padding-left: 25px;">{{series}}</p>
+                                        <p style="text-align: center; padding-left: 10px; padding-right: 10px;">#{{item|number}}</p>
+                                        {% if item|variant_list %}
+                                            <select name="variant" class="form-select" aria-label="Select Variant">
+                                                <option selected>Default</option>
+                                                {% for variant in item|variant_list %}
+                                                    <option value="{{ variant|variant_data }}">{{ variant|variant_name }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        {% endif %}
+                                        <input type="hidden" name="issue_data" value="{{item|issue_formbundle:series_data}}">
+                                        <button class="btn btn-dark" type="submit" style="background-color: #00a9b5; margin-left: auto;">Add</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    {% endif %}
+                {% endfor %}
+                <script type="text/javascript" src="{% static 'js/add.js' %}" ></script>
+            </div>
+        </div>
+    </div>
+{% endblock %}
